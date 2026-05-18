@@ -4,172 +4,369 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portali i Kontakteve Avex</title>
-    <style>
-        :root {
-            --avex-blue: #1e3a5f;
-            --avex-light-blue: #3498db;
-            --text-dark: #2c3e50;
-            --border-color: #000;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f7f9;
-        }
-
-        /* Header me Logo dhe Titull */
-        .header {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-            border-bottom: 5px solid var(--border-color);
-        }
-
-        /* Përmirësimi i Logos Avex */
-        .avex-logo {
-            max-width: 250px; /* E zmadhuar pak për dukshmëri */
-            height: auto;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-weight: 700;
-        }
-
-        /* Containeri kryesor me ndarjen 2x2 */
-        .main-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            border-left: 5px solid var(--border-color);
-            border-right: 5px solid var(--border-color);
-            border-bottom: 5px solid var(--border-color);
-            min-height: 80vh;
-            background: white;
-        }
-
-        /* Përshtatja për Celular */
-        @media (max-width: 700px) {
-            .main-container { grid-template-columns: 1fr; }
-            .quadrant { border-right: none !important; border-bottom: 5px solid var(--border-color) !important; }
-        }
-
-        .quadrant {
-            padding: 20px;
-            border-right: 3px solid var(--border-color);
-            border-bottom: 3px solid var(--border-color);
-            overflow-y: auto;
-        }
-
-        h2 {
-            font-size: 22px;
-            color: var(--avex-blue);
-            margin: 0 0 15px 0;
-            border-bottom: 3px solid var(--avex-light-blue);
-            padding-bottom: 5px;
-            text-transform: uppercase;
-        }
-
-        table { width: 100%; border-collapse: collapse; }
-        td { padding: 14px 8px; border-bottom: 1px solid #eee; font-size: 16px; color: var(--text-dark); }
-        .num { width: 30px; font-weight: bold; color: #7f8c8d; }
-        
-        .tel-link { 
-            color: white; 
-            text-decoration: none; 
-            font-weight: bold; 
-            background: var(--avex-light-blue);
-            padding: 8px 12px;
-            border-radius: 6px;
-            white-space: nowrap;
-            display: inline-block;
-        }
-
-        .loading { font-style: italic; color: #95a5a6; }
-    </style>
-</head>
-<body>
-
-<div class="header">
-    <img src="https://lh3.googleusercontent.com/d/11jmh4nqa0nqT1tO1dhi85vc_NUvAnCr3" alt="Avex Logo" class="avex-logo">
-    <h1>Portali i Kontakteve Avex</h1>
-</div>
-
-<div class="main-container">
-    <div class="quadrant">
-        <h2>Zyra</h2>
-        <table><tbody id="zyra-body"><tr><td class="loading">Duke ngarkuar...</td></tr></tbody></table>
-    </div>
-
-    <div class="quadrant">
-        <h2>Shitja</h2>
-        <table><tbody id="shitja-body"><tr><td class="loading">Duke ngarkuar...</td></tr></tbody></table>
-    </div>
-
-    <div class="quadrant">
-        <h2>Shpërndarja</h2>
-        <table><tbody id="shperndarja-body"><tr><td class="loading">Duke ngarkuar...</td></tr></tbody></table>
-    </div>
-
-    <div class="quadrant" style="border-bottom: none;">
-        <h2>Magazina</h2>
-        <table><tbody id="magazina-body"><tr><td class="loading">Duke ngarkuar...</td></tr></tbody></table>
-    </div>
-</div>
-
-<script>
-    const config = {
-        'zyra-body': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlPlCjw7b9wd3wNaDkTLqzKrzO6dvcM3sXnlwVIPPjV2sY9Pmks6fmUyC8SPeJNKYLoMJo6vLaq6DT/pub?output=csv',
-        'magazina-body': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQw0HlD6AAz335IsU3XsokC6KRR3QNZHlT7rI_fyHMTWWUZVbuTSKAX-1qKBCxYvMQ2lZCuiMlaw3xn/pub?output=csv',
-        'shitja-body': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSI5sXsvoCNvPpOxLR_pVJC8Pkw4h9YvUXCbeq9CbrxcnSIkXUhfaV7HywQdPEhHG_GxY0xbQzcAdGV/pub?output=csv',
-        'shperndarja-body': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTjBXI6VHpxt53ED1VkQV7DoTsFdaQxlhAu1AnEF2TqX-a7ISD56N2mzZZ-vmaYK5FIt-9ABfqpEme2/pub?output=csv'
-    };
-
-    async function fetchSheetData(url, elementId) {
-        try {
-            const response = await fetch(url);
-            const text = await response.text();
-            const rows = text.split('\n').map(row => row.split(','));
-            
-            const tbody = document.getElementById(elementId);
-            tbody.innerHTML = '';
-
-            for (let i = 1; i < rows.length; i++) {
-                const emri = rows[i][0] ? rows[i][0].trim() : "";
-                const tel = rows[i][1] ? rows[i][1].trim() : "";
-
-                if (emri || tel) {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="num">${i}</td>
-                        <td><strong>${emri}</strong></td>
-                        <td><a href="tel:${tel}" class="tel-link">📞 ${tel}</a></td>
-                    `;
-                    tbody.appendChild(tr);
+    
+    <!-- Load Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        avex: {
+                            dark: '#0f2027',
+                            blue: '#1e3a5f',
+                            light: '#3498db',
+                            gradient: '#2c5364'
+                        }
+                    }
                 }
             }
-        } catch (error) {
-            document.getElementById(elementId).innerHTML = '<tr><td>Gabim në sinkronizim.</td></tr>';
         }
-    }
-
-    function refreshDashboard() {
-        for (const [id, url] of Object.entries(config)) {
-            fetchSheetData(url, id);
+    </script>
+    <style>
+        /* Custom scrollbar for webkit to make the lists look cleaner */
+        ::-webkit-scrollbar {
+            width: 6px;
         }
-    }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        .department-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
-    refreshDashboard();
-    setInterval(refreshDashboard, 120000);
-</script>
+    <header class="bg-gradient-to-r from-avex-dark via-avex-blue to-avex-gradient text-white shadow-lg border-b-4 border-avex-light relative z-10">
+        <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <!-- Logo & Title -->
+                <div class="flex flex-col items-center md:items-start text-center md:text-left">
+                    <img src="https://lh3.googleusercontent.com/d/11jmh4nqa0nqT1tO1dhi85vc_NUvAnCr3" alt="Avex Logo" class="h-16 md:h-20 w-auto object-contain bg-white/10 backdrop-blur-sm rounded-lg p-2 mb-2 shadow-md">
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight uppercase text-white drop-shadow-md">
+                        Portali i Kontakteve
+                    </h1>
+                </div>
 
+                <!-- Search Bar -->
+                <div class="w-full md:w-1/3 max-w-md relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <input type="text" id="searchInput" placeholder="Kërko kontakt..." 
+                        class="block w-full pl-10 pr-3 py-3 border border-transparent rounded-xl leading-5 bg-white/10 backdrop-blur-md text-white placeholder-gray-300 focus:outline-none focus:bg-white focus:text-slate-900 focus:placeholder-gray-400 focus:ring-0 sm:text-sm transition duration-300 shadow-inner">
+                </div>
+                
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+
+            <!-- Zyra Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                <div class="bg-slate-50 px-5 py-4 border-b border-slate-200 flex items-center gap-3">
+                    <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-avex-blue uppercase tracking-wide">Zyra</h2>
+                </div>
+                <div class="p-0 department-list flex-grow">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <tbody id="zyra-body" class="bg-white divide-y divide-slate-100 contact-list">
+                            <tr><td class="p-6 text-center text-slate-400"><div class="spinner mb-2"></div><br>Duke ngarkuar...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Shitja Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                <div class="bg-slate-50 px-5 py-4 border-b border-slate-200 flex items-center gap-3">
+                    <div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-avex-blue uppercase tracking-wide">Shitja</h2>
+                </div>
+                <div class="p-0 department-list flex-grow">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <tbody id="shitja-body" class="bg-white divide-y divide-slate-100 contact-list">
+                            <tr><td class="p-6 text-center text-slate-400"><div class="spinner mb-2"></div><br>Duke ngarkuar...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Shpërndarja Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                <div class="bg-slate-50 px-5 py-4 border-b border-slate-200 flex items-center gap-3">
+                    <div class="p-2 bg-amber-100 text-amber-600 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-avex-blue uppercase tracking-wide">Shpërndarja</h2>
+                </div>
+                <div class="p-0 department-list flex-grow">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <tbody id="shperndarja-body" class="bg-white divide-y divide-slate-100 contact-list">
+                            <tr><td class="p-6 text-center text-slate-400"><div class="spinner mb-2"></div><br>Duke ngarkuar...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Magazina Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                <div class="bg-slate-50 px-5 py-4 border-b border-slate-200 flex items-center gap-3">
+                    <div class="p-2 bg-purple-100 text-purple-600 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-avex-blue uppercase tracking-wide">Magazina</h2>
+                </div>
+                <div class="p-0 department-list flex-grow">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <tbody id="magazina-body" class="bg-white divide-y divide-slate-100 contact-list">
+                            <tr><td class="p-6 text-center text-slate-400"><div class="spinner mb-2"></div><br>Duke ngarkuar...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Dyqani Walkers Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                <div class="bg-slate-50 px-5 py-4 border-b border-slate-200 flex items-center gap-3">
+                    <div class="p-2 bg-rose-100 text-rose-600 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-avex-blue uppercase tracking-wide">Dyqani Walkers</h2>
+                </div>
+                <div class="p-0 department-list flex-grow">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <tbody id="walkers-body" class="bg-white divide-y divide-slate-100 contact-list">
+                            <tr><td class="p-6 text-center text-slate-400"><div class="spinner mb-2"></div><br>Duke ngarkuar...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Configuration: Google Sheets CSV published links
+        const config = {
+            'zyra-body': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlPlCjw7b9wd3wNaDkTLqzKrzO6dvcM3sXnlwVIPPjV2sY9Pmks6fmUyC8SPeJNKYLoMJo6vLaq6DT/pub?output=csv',
+            'shitja-body': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSI5sXsvoCNvPpOxLR_pVJC8Pkw4h9YvUXCbeq9CbrxcnSIkXUhfaV7HywQdPEhHG_GxY0xbQzcAdGV/pub?output=csv',
+            'shperndarja-body': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTjBXI6VHpxt53ED1VkQV7DoTsFdaQxlhAu1AnEF2TqX-a7ISD56N2mzZZ-vmaYK5FIt-9ABfqpEme2/pub?output=csv',
+            'magazina-body': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQw0HlD6AAz335IsU3XsokC6KRR3QNZHlT7rI_fyHMTWWUZVbuTSKAX-1qKBCxYvMQ2lZCuiMlaw3xn/pub?output=csv',
+            'walkers-body': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT803F8p5PVoTTW74cTy9IOSIQ3EOWAPkm7BNFAeTcGO1yACFa9gDkUGy_IPEu89u4Fj6jz6nQlX9OZ/pub?output=csv'
+        };
+
+        // Cache to store the parsed data for quick searching without refetching
+        const cachedData = {
+            'zyra-body': [],
+            'shitja-body': [],
+            'shperndarja-body': [],
+            'magazina-body': [],
+            'walkers-body': []
+        };
+
+        // Advanced CSV Parser with auto-delimiter detection and quote handling
+        function parseCSV(text) {
+            const lines = text.replace(/\r/g, '').split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) return [];
+            
+            // Detect separator: comma (,) vs semicolon (;)
+            const firstLine = lines[0];
+            const commaCount = (firstLine.match(/,/g) || []).length;
+            const semicolonCount = (firstLine.match(/;/g) || []).length;
+            const separator = semicolonCount > commaCount ? ';' : ',';
+
+            return lines.map(line => {
+                let cells = [];
+                let currentCell = "";
+                let inQuotes = false;
+                
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes; // Toggle quote state and skip quote char
+                    } else if (char === separator && !inQuotes) {
+                        cells.push(currentCell.trim());
+                        currentCell = "";
+                    } else {
+                        currentCell += char;
+                    }
+                }
+                cells.push(currentCell.trim());
+                return cells;
+            });
+        }
+
+        // Function to render data into a specific table body
+        function renderTable(elementId, dataToRender) {
+            const tbody = document.getElementById(elementId);
+            tbody.innerHTML = ''; // Clear loading or previous state
+
+            if (dataToRender.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-8 text-center text-slate-400 italic">Nuk u gjet asnjë kontakt.</td></tr>`;
+                return;
+            }
+
+            dataToRender.forEach((contact, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors group contact-row";
+                
+                // Format the phone link button
+                const phoneButton = contact.tel ? `
+                    <a href="tel:${contact.tel}" class="inline-flex items-center gap-2 px-3 py-1.5 bg-avex-light/10 text-avex-light hover:bg-avex-light hover:text-white rounded-lg font-medium transition-all duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                        ${contact.tel}
+                    </a>
+                ` : `<span class="text-slate-400 italic text-sm">Pa numër</span>`;
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap w-12 text-center text-sm font-medium text-slate-400 group-hover:text-avex-light transition-colors">${index + 1}</td>
+                    <td class="px-4 py-3 text-sm font-semibold text-slate-700 contact-name">${contact.emri}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right">${phoneButton}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function fetchSheetData(url, elementId) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Network response was not ok");
+                
+                const text = await response.text();
+                const rows = parseCSV(text);
+                
+                // Reset cache for this element
+                cachedData[elementId] = [];
+
+                // Smart Header Detection: Decide if we should skip the first row (index 0)
+                let startIndex = 0;
+                if (rows.length > 0) {
+                    const firstRowJoined = rows[0].join(' ').toLowerCase();
+                    // If first row has keywords of headers, skip it. Otherwise keep it as contact!
+                    if (firstRowJoined.includes('emri') || 
+                        firstRowJoined.includes('name') || 
+                        firstRowJoined.includes('tel') || 
+                        firstRowJoined.includes('telefon') || 
+                        firstRowJoined.includes('numri') || 
+                        firstRowJoined.includes('kontakt')) {
+                        startIndex = 1; 
+                    }
+                }
+
+                for (let i = startIndex; i < rows.length; i++) {
+                    const cells = rows[i];
+                    if (!cells || cells.length === 0) continue;
+
+                    let emri = "";
+                    let tel = "";
+
+                    if (cells.length === 1) {
+                        emri = cells[0];
+                    } else if (cells.length >= 2) {
+                        emri = cells[0];
+                        // Robust column check: find any cell that looks like a phone number
+                        const otherCells = cells.slice(1).filter(c => c !== "");
+                        if (otherCells.length > 0) {
+                            // Find cell with at least 5 digits/phone characters
+                            const numCell = otherCells.find(c => /[\d+\-\s\/]{5,}/.test(c));
+                            tel = numCell || otherCells[0];
+                        }
+                    }
+
+                    if (emri || tel) {
+                        cachedData[elementId].push({ emri, tel });
+                    }
+                }
+                
+                // Trigger rendering based on current search filter
+                applySearchFilter();
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                document.getElementById(elementId).innerHTML = `
+                    <tr><td colspan="3" class="px-6 py-8 text-center text-red-500 bg-red-50">
+                        <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Gabim në sinkronizim.
+                    </td></tr>`;
+            }
+        }
+
+        // Search Filter Logic
+        function applySearchFilter() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            for (const id of Object.keys(cachedData)) {
+                // Filter the cached data array
+                const filteredData = cachedData[id].filter(contact => {
+                    const nameMatch = contact.emri.toLowerCase().includes(searchTerm);
+                    const phoneMatch = contact.tel.toLowerCase().includes(searchTerm);
+                    return nameMatch || phoneMatch;
+                });
+
+                // Re-render the table with the filtered data
+                renderTable(id, filteredData);
+            }
+        }
+
+        // Event listener for the search bar
+        document.getElementById('searchInput').addEventListener('input', applySearchFilter);
+
+        // Fetch all sheets function
+        function refreshDashboard() {
+            for (const [id, url] of Object.entries(config)) {
+                fetchSheetData(url, id);
+            }
+        }
+
+        // Initialize on load
+        refreshDashboard();
+        
+        // Auto-refresh every 2 minutes (120000 ms)
+        setInterval(refreshDashboard, 120000);
+    </script>
 </body>
 </html>
